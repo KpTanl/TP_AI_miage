@@ -64,14 +64,38 @@ class Dames:
                 self.table = res[0]
             return res
         return []
-            
 
-#main
-# 创建求解器并运行 BFS 求一个解
-d = Dames()
-solution = d.bfs(n=8, find_all=False)
-# 打印解与内部 table（与 solution 相同）
-print("ans", solution)
-print("table：", d.table)
+    def dfs(self, n: int = 8, find_all: bool = False):
+        def search(partial):
+            row = len(partial)
+            if row == n:
+                if find_all:
+                    res.append(partial)
+                    return None
+                return partial
+            for c in range(n):
+                if self.verifier_dames(partial, c):
+                    found = search(partial + [c])
+                    if found is not None:
+                        return found
+            return None
+
+        res = []
+        found = search([])
+        if find_all:
+            if res:
+                self.table = res[0]
+            return res
+        if found is None:
+            return []
+        self.table = found
+        return found
+
+
+if __name__ == "__main__":
+    d = Dames()
+    solution = d.bfs(n=8, find_all=False)
+    print("ans", solution)
+    print("table：", d.table)
 
 
