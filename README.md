@@ -93,7 +93,7 @@
 | 编号 | BFS（TP1：BFS，代码片段） | DFS（TP1：DFS，代码片段） | A*（TP2：A_etoile，代码片段） |
 | :-- | :-- | :-- | :-- |
 | 1 | `frontier = [node]`<br>`explored = []` | `frontier = [start_node]`<br>`explored = []` | `frontier = [(node, f_val)]`<br>`explored = []` |
-| 2 | `node = frontier.pop(0)` | `node = frontier.pop()` | `min_idx = 0`<br>`...`<br>`node, f_val = frontier.pop(min_idx)` |
+| 2 | `node = frontier.pop(0)` | `node = frontier.pop()` | `min_idx = 0`<br>`for i in range(1, len(frontier)):`<br>`    if frontier[i][1] < frontier[min_idx][1]:`<br>`        min_idx = i`<br>`node, f_val = frontier.pop(min_idx)` |
 | 3 | `if problem.is_goal(child.state):`<br>`    return child, count` | `if problem.is_goal(node.state):`<br>`    return node, count` | `if problem.is_goal(node.state):`<br>`    return node, count` |
 | 4 | `if child.state in explored:`<br>`    continue`<br>`for n in frontier:`<br>`    if n.state == child.state:` | `if child.state in explored:`<br>`    continue`<br>`for n in frontier:`<br>`    if n.state == child.state:` | `if child.state in explored:`<br>`    continue`<br>`for i in range(len(frontier)):`<br>`    existing_node, existing_f = frontier[i]` |
 | 5 | `for child in node.expand(problem):` | `children = node.expand(problem)`<br>`for child in children:` | `h_child = heuristique(child.state, problem.goal_state)`<br>`f_child = child.path_cost + h_child` |
@@ -264,3 +264,49 @@ TP2 的 A*（函数名 `A_etoile`）的核心变化是：`frontier` 不再只存
 - TP2（信息搜索）：[TP_Recherche_Arborescente_Informee.ipynb](file:///d:/Desk/Daily/EDU%20TLS/M1/AI/TP_AI_miage/TP2/TP_Recherche_Arborescente_Informee.ipynb)
   - 运行 A*：`def A_etoile(problem, heuristique, budget=float('inf'))`（创建函数处）
   - 对比两种启发式：Exercise 6（分别用 `calcule_h1` 与 `calcule_h2`）
+
+
+## TP3：SAT 与 CSP（TP-SAT）
+
+参考文件：
+- [TP_SAT_et_CSP.ipynb](file:///d:/Desk/Daily/EDU%20TLS/M1/AI/TP_AI_miage/TP3/TP_SAT_et_CSP.ipynb)
+
+### 1. 实现方式
+
+#### 1.1 SAT 实现（`Sudoku_SAT` + `solve_sudoku_sat`）
+- 使用 `pysat` 将 Sudoku 编码为 CNF：变量 `var_map[(i, j, k)]` 表示“第 i 行第 j 列是数字 k”。
+- 约束包含：
+  - 每格至少一个值。
+  - 每格至多一个值。
+  - 每行/每列/每个 3x3 宫都包含 1~9。
+  - 初始已知数字用单位子句固定。
+- 调用 `Glucose3` 求解并把 SAT 模型反解回 9x9 网格。
+
+#### 1.2 CSP 实现（`solve_sudoku_csp_no_sugar` / `solve_sudoku_csp`）
+- 使用 `python-constraint` 建模：
+  - 变量：每个格子 `(i, j)`。
+  - 值域：空格为 `1..9`，已知数字为单值域。
+  - 约束：行/列/宫分别加 `AllDifferentConstraint()`。
+- `solve_sudoku_csp` 返回候选解列表，通常取第一个解展示。
+
+### 2. 调用方式（重点）
+
+#### 2.1 SAT 调用
+```python
+res = solve_sudoku_sat(grid)
+if res:
+    visualize_sudoku(res)
+```
+
+#### 2.2 CSP 调用
+```python
+res = solve_sudoku_csp(grid)
+if res:
+    visualize_sudoku(res[0])
+```
+
+### 3. Notebook 运行顺序（TP-SAT）
+1. 安装依赖（按需）：`python-sat`、`python-constraint`。
+2. 运行 SAT 建模和求解单元：`Sudoku_SAT` -> `solve_sudoku_sat` -> SAT 示例调用。
+3. 运行 CSP 建模和求解单元：`solve_sudoku_csp_no_sugar`/`solve_sudoku_csp` -> CSP 示例调用。
+4. 最后运行比较单元：`comparer_solveurs` 与表格输出。
